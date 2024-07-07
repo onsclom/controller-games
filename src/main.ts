@@ -1,5 +1,5 @@
-import { updateInput } from "./input";
-import { gameUpdateAndDraw } from "./game";
+import { updateAndDraw } from "./pong";
+import { gameState } from "./state";
 
 const FIXED_FPS = null; // null for requestAnimationFrame, or a number for fixed FPS
 const SHOW_FRAME_TIME = true;
@@ -8,7 +8,6 @@ const BUDGET = 1000 / 120;
 const canvas = document.createElement("canvas");
 document.body.appendChild(canvas);
 const ctx = canvas.getContext("2d")!;
-
 let interval = 0;
 let raf = 0;
 
@@ -35,8 +34,7 @@ function gameStep() {
   const newTime = performance.now();
   const dt = newTime - lastTime;
   lastTime = newTime;
-  updateInput();
-  gameUpdateAndDraw(canvas, ctx, dt);
+  updateAndDraw(canvas, ctx, dt, gameState);
 
   if (SHOW_FRAME_TIME) {
     const endTime = performance.now();
@@ -62,11 +60,14 @@ function gameStep() {
   }
 }
 
-// i don't completely understand this... but it works!
+function cleanup() {
+  cancelAnimationFrame(raf);
+  clearInterval(interval);
+  canvas.remove();
+}
+
 if (import.meta.hot) {
   import.meta.hot.accept(() => {
-    cancelAnimationFrame(raf);
-    clearInterval(interval);
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    cleanup();
   });
 }
