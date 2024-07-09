@@ -2,31 +2,38 @@ const audioContext = new AudioContext();
 const masterGain = audioContext.createGain();
 masterGain.connect(audioContext.destination);
 
-// prettier-ignore
-const soundNames = [
-  // chess.com sounds
-  "capture", "move", "promote",
-  // other sounds
-] as const;
+export function playHitSound() {
+  const osc = audioContext.createOscillator();
+  osc.connect(masterGain);
+  osc.frequency.value = 440;
+  osc.type = "triangle";
+  osc.start();
+  osc.stop(audioContext.currentTime + 0.025);
+}
 
-const volumeMap = {
-  step: 0.2, // good example, but no longer used...
-};
+export function playBounceSound() {
+  const osc = audioContext.createOscillator();
+  osc.connect(masterGain);
+  osc.frequency.value = 220;
+  osc.type = "sine";
+  osc.start();
+  osc.stop(audioContext.currentTime + 0.025);
+}
 
-export function playSound(soundName: (typeof soundNames)[number]) {
-  const sound = new Audio(`./sounds/${soundName}.mp3`);
-  const source = audioContext.createMediaElementSource(sound);
-
-  // @ts-ignore
-  const volume = volumeMap[soundName] ?? 1;
-  masterGain.gain.value = volume;
-
-  source.connect(masterGain);
-  sound.play();
+export function playScoreSound() {
+  const osc = audioContext.createOscillator();
+  osc.connect(masterGain);
+  osc.frequency.value = 880;
+  osc.type = "sine";
+  osc.start();
+  osc.stop(audioContext.currentTime + 0.025);
 }
 
 // fixes:
 // The AudioContext was not allowed to start.
 // It must be resumed (or created) after a user gesture on the page.
 // https://goo.gl/7K7WLu
+
 document.body.onclick = () => audioContext.resume();
+// on gamepad connected too
+window.addEventListener("gamepadconnected", () => audioContext.resume());

@@ -1,5 +1,6 @@
-import { updateAndDraw } from "./pong";
+// vite bundling bug? (try switching this import order!)
 import { gameState } from "./state";
+import { updateAndDraw } from "./pong";
 
 const FIXED_FPS = null; // null for requestAnimationFrame, or a number for fixed FPS
 const SHOW_FRAME_TIME = true;
@@ -60,14 +61,10 @@ function gameStep() {
   }
 }
 
-function cleanup() {
-  cancelAnimationFrame(raf);
-  clearInterval(interval);
-  canvas.remove();
-}
-
 if (import.meta.hot) {
   import.meta.hot.accept(() => {
-    cleanup();
+    cancelAnimationFrame(raf);
+    clearInterval(interval);
+    canvas.remove();
   });
 }
