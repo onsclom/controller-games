@@ -10,8 +10,6 @@
 
 /*
 game feel:
-- ball squish
-- ball trail ?
 - particles on win maybe??
 - slow mo on point win??
 - hit stun?
@@ -32,9 +30,9 @@ const pointsToWin = 11;
 const paddleSpeed = 0.5;
 const controllerDeadzone = 0.1;
 const ballTrailParts = 100;
-
 const physicFramesPerSecond = 500;
 
+const playersControlAngle = true;
 export function createState() {
   const state = {
     type: "countdown" as "countdown" | "playing" | "gameover",
@@ -174,11 +172,22 @@ export function updateAndDraw(
 
         if (
           state.ball.x - state.ballWidth * 0.5 < paddleWidth &&
-          state.ball.y > state.leftPaddleY &&
-          state.ball.y < state.leftPaddleY + paddleHeight
+          state.ball.y - state.ballWidth * 0.5 > state.leftPaddleY &&
+          state.ball.y + state.ballWidth * 0.5 <
+            state.leftPaddleY + paddleHeight
         ) {
           playHitSound();
-          state.ball.dx = Math.abs(state.ball.dx);
+          if (playersControlAngle) {
+            const ballDistanceFromPaddleCenter =
+              state.ball.y - (state.leftPaddleY + paddleHeight / 2);
+            const angle =
+              (Math.PI / 3) *
+              (ballDistanceFromPaddleCenter / (paddleHeight / 2));
+            state.ball.dx = Math.cos(angle);
+            state.ball.dy = Math.sin(angle);
+          } else {
+            state.ball.dx = Math.abs(state.ball.dx);
+          }
           state.ball.x = paddleWidth + state.ballWidth * 0.5;
           gamepads[0]?.vibrationActuator?.playEffect("dual-rumble", {
             duration: 50,
@@ -191,11 +200,22 @@ export function updateAndDraw(
           state.ball.scale += 0.5;
         } else if (
           state.ball.x + state.ballWidth * 0.5 > 400 - paddleWidth &&
-          state.ball.y > state.rightPaddleY &&
-          state.ball.y < state.rightPaddleY + paddleHeight
+          state.ball.y - state.ballWidth * 0.5 > state.rightPaddleY &&
+          state.ball.y + state.ballWidth * 0.5 <
+            state.rightPaddleY + paddleHeight
         ) {
           playHitSound();
-          state.ball.dx = -Math.abs(state.ball.dx);
+          if (playersControlAngle) {
+            const ballDistanceFromPaddleCenter =
+              state.ball.y - (state.rightPaddleY + paddleHeight / 2);
+            const angle =
+              (Math.PI / 3) *
+              (ballDistanceFromPaddleCenter / (paddleHeight / 2));
+            state.ball.dx = -Math.cos(angle);
+            state.ball.dy = Math.sin(angle);
+          } else {
+            state.ball.dx = -Math.abs(state.ball.dx);
+          }
           state.ball.x = 400 - paddleWidth - state.ballWidth * 0.5;
           gamepads[1]?.vibrationActuator?.playEffect("dual-rumble", {
             duration: 50,
