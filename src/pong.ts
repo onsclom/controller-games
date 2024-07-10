@@ -10,7 +10,6 @@
 
 /*
 game feel:
-- screenshake
 - ball squish
 - ball trail ?
 - particles on win maybe??
@@ -55,9 +54,15 @@ export function createState() {
         x: gameResolution.width / 2,
         y: gameResolution.height / 2,
       })),
+      scale: 1,
     },
     ballWidth: 10,
     timeToSimulate: 0,
+
+    cameraOffset: {
+      x: 0,
+      y: 0,
+    },
   };
   startNewRound(state);
   return state;
@@ -151,14 +156,20 @@ export function updateAndDraw(
         state.ball.x += state.ball.dx * dt * state.ball.speed;
         state.ball.y += state.ball.dy * dt * state.ball.speed;
 
+        const ballScaleUp = 0.75;
+        const cameraShakeForce = 10 * state.ball.speed;
         if (state.ball.y - state.ballWidth * 0.5 < 0) {
           state.ball.dy = Math.abs(state.ball.dy);
           state.ball.y = 0 + state.ballWidth * 0.5;
           playBounceSound();
+          state.cameraOffset.y -= cameraShakeForce;
+          state.ball.scale += ballScaleUp;
         } else if (state.ball.y + state.ballWidth * 0.5 > 300) {
           state.ball.dy = -Math.abs(state.ball.dy);
           state.ball.y = 300 - state.ballWidth * 0.5;
           playBounceSound();
+          state.cameraOffset.y += cameraShakeForce;
+          state.ball.scale += ballScaleUp;
         }
 
         if (
@@ -176,6 +187,8 @@ export function updateAndDraw(
           });
           const targetSpeedDiff = maxSpeed - state.ball.speed;
           state.ball.speed += targetSpeedDiff * speedApproachFactor;
+          state.cameraOffset.x -= cameraShakeForce;
+          state.ball.scale += 0.5;
         } else if (
           state.ball.x + state.ballWidth * 0.5 > 400 - paddleWidth &&
           state.ball.y > state.rightPaddleY &&
@@ -191,6 +204,8 @@ export function updateAndDraw(
           });
           const targetSpeedDiff = maxSpeed - state.ball.speed;
           state.ball.speed += targetSpeedDiff * speedApproachFactor;
+          state.cameraOffset.x += cameraShakeForce;
+          state.ball.scale += 0.5;
         }
 
         state.ball.trail.push({
@@ -219,13 +234,20 @@ export function updateAndDraw(
         while (state.ball.trail.length > ballTrailParts) {
           state.ball.trail.shift();
         }
+
+        const cameraYDiff = 0 - state.cameraOffset.y;
+        state.cameraOffset.y += cameraYDiff * 0.01 * dt;
+        const cameraXDiff = 0 - state.cameraOffset.x;
+        state.cameraOffset.x += cameraXDiff * 0.01 * dt;
+        const ballScaleDiff = 1 - state.ball.scale;
+        state.ball.scale += ballScaleDiff * 0.01 * dt;
         break;
       }
 
       case "gameover":
         state.countdown -= dt;
         if (state.countdown <= 0) {
-          // resetState
+          // TODO: resetState
         }
         break;
       default:
@@ -261,7 +283,6 @@ export function updateAndDraw(
   ctx.fillStyle = "black";
   ctx.fillRect(0, 0, drawingRect.width, drawingRect.height);
   ctx.fillStyle = "#333";
-  ctx.fillRect(gameArea.x, gameArea.y, gameArea.width, gameArea.height);
   {
     ctx.save();
     ctx.translate(gameArea.x, gameArea.y);
@@ -269,6 +290,8 @@ export function updateAndDraw(
       gameArea.width / gameResolution.width,
       gameArea.height / gameResolution.height,
     );
+    ctx.translate(state.cameraOffset.x, state.cameraOffset.y);
+    ctx.fillRect(0, 0, gameResolution.width, gameResolution.height);
 
     ctx.fillStyle = "white";
     ctx.fillRect(0, state.leftPaddleY, paddleWidth, paddleHeight);
@@ -284,20 +307,20 @@ export function updateAndDraw(
     if (state.type !== "countdown") {
       ctx.fillStyle = "white";
       ctx.fillRect(
-        state.ball.x - state.ballWidth * 0.5,
-        state.ball.y - state.ballWidth * 0.5,
-        state.ballWidth,
-        state.ballWidth,
+        state.ball.x - state.ballWidth * state.ball.scale * 0.5,
+        state.ball.y - state.ballWidth * state.ball.scale * 0.5,
+        state.ballWidth * state.ball.scale,
+        state.ballWidth * state.ball.scale,
       );
 
       state.ball.trail.forEach((trailItem, index) => {
         ctx.fillStyle = "white";
         const scale = (index / state.ball.trail.length) * 0.5 + 0.5;
         ctx.fillRect(
-          trailItem.x - state.ballWidth * 0.5 * scale,
-          trailItem.y - state.ballWidth * 0.5 * scale,
-          state.ballWidth * scale,
-          state.ballWidth * scale,
+          trailItem.x - state.ballWidth * state.ball.scale * 0.5 * scale,
+          trailItem.y - state.ballWidth * state.ball.scale * 0.5 * scale,
+          state.ballWidth * state.ball.scale * scale,
+          state.ballWidth * state.ball.scale * scale,
         );
       });
     }
