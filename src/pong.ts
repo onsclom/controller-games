@@ -156,6 +156,7 @@ export function updateAndDraw(
 
         const ballScaleUp = 0.75;
         const cameraShakeForce = 10 * state.ball.speed;
+
         if (state.ball.y - state.ballWidth * 0.5 < 0) {
           state.ball.dy = Math.abs(state.ball.dy);
           state.ball.y = 0 + state.ballWidth * 0.5;
@@ -170,10 +171,11 @@ export function updateAndDraw(
           state.ball.scale += ballScaleUp;
         }
 
+        const leniency = 10; // additional space to make paddles bigger
         if (
           state.ball.x - state.ballWidth * 0.5 < paddleWidth &&
-          state.ball.y - state.ballWidth * 0.5 > state.leftPaddleY &&
-          state.ball.y + state.ballWidth * 0.5 <
+          state.ball.y - state.ballWidth * 0.5 + leniency > state.leftPaddleY &&
+          state.ball.y + state.ballWidth * 0.5 - leniency <
             state.leftPaddleY + paddleHeight
         ) {
           playHitSound();
@@ -181,7 +183,7 @@ export function updateAndDraw(
             const ballDistanceFromPaddleCenter =
               state.ball.y - (state.leftPaddleY + paddleHeight / 2);
             const angle =
-              (Math.PI / 3) *
+              (Math.PI / 4) *
               (ballDistanceFromPaddleCenter / (paddleHeight / 2));
             state.ball.dx = Math.cos(angle);
             state.ball.dy = Math.sin(angle);
@@ -200,8 +202,9 @@ export function updateAndDraw(
           state.ball.scale += 0.5;
         } else if (
           state.ball.x + state.ballWidth * 0.5 > 400 - paddleWidth &&
-          state.ball.y - state.ballWidth * 0.5 > state.rightPaddleY &&
-          state.ball.y + state.ballWidth * 0.5 <
+          state.ball.y - state.ballWidth * 0.5 + leniency >
+            state.rightPaddleY &&
+          state.ball.y + state.ballWidth * 0.5 - leniency <
             state.rightPaddleY + paddleHeight
         ) {
           playHitSound();
@@ -209,7 +212,7 @@ export function updateAndDraw(
             const ballDistanceFromPaddleCenter =
               state.ball.y - (state.rightPaddleY + paddleHeight / 2);
             const angle =
-              (Math.PI / 3) *
+              (Math.PI / 4) *
               (ballDistanceFromPaddleCenter / (paddleHeight / 2));
             state.ball.dx = -Math.cos(angle);
             state.ball.dy = Math.sin(angle);
