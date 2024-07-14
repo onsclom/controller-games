@@ -1,42 +1,25 @@
-// important:
-//   - ball angles off paddles based where it hits
-//     - maybe not actually? maybe make this a setting?
-//   - first to 11 wins
-// stretch:
-//   - have some time inbetween wins to celebrate
-//   - add sound
-//   - screenshake
-//   - trail on ball
-
-/*
-game feel:
-- particles on win maybe??
-- slow mo on point win??
-- hit stun?
-- SOUND (lots of bass)
-- color flash on ball bounce
-*/
-
 import { playBounceSound, playHitSound, playScoreSound } from "./sound";
-import { gameState } from "./state";
 
 const gameResolution = { width: 400, height: 300 };
 const paddleWidth = 10;
 const paddleHeight = 70;
 const startSpeed = 0.3;
-const maxSpeed = 1;
+const maxSpeed = 0.8;
 const speedApproachFactor = 0.05;
 const pointsToWin = 11;
 const paddleSpeed = 0.5;
-const controllerDeadzone = 0.1;
+const controllerDeadzone = 0.2;
 const ballTrailParts = 100;
-const physicFramesPerSecond = 500;
-
+const physicFramesPerSecond = 1000;
 const playersControlAngle = true;
+
+let state = createState();
+
 export function createState() {
   const state = {
-    type: "countdown" as "countdown" | "playing" | "gameover",
+    type: "startScreen" as "startScreen" | "countdown" | "playing",
     countdown: 3000,
+    newRound: false,
 
     leftScore: 0,
     rightScore: 0,
@@ -66,7 +49,7 @@ export function createState() {
   return state;
 }
 
-function startNewRound(state: typeof gameState) {
+function startNewRound(state: ReturnType<typeof createState>) {
   state.ball.x = 200;
   state.ball.y = 150;
   const possibleDxs = [-1, 1];
@@ -86,19 +69,38 @@ export function updateAndDraw(
   canvas: HTMLCanvasElement,
   ctx: CanvasRenderingContext2D,
   dt: number,
-  state: typeof gameState,
 ) {
   // UPDATE
   /////////////
   state.timeToSimulate += dt;
-  const stepsToSimulate = Math.floor(
+  let stepsToSimulate = Math.floor(
     state.timeToSimulate / (1000 / physicFramesPerSecond),
   );
-  state.timeToSimulate -= stepsToSimulate * (1000 / physicFramesPerSecond);
 
+  if (stepsToSimulate > 0) {
+    state.timeToSimulate -= stepsToSimulate * (1000 / physicFramesPerSecond);
+    if (state.newRound) {
+      startNewRound(state);
+      state.newRound = false;
+      if (state.leftScore >= pointsToWin || state.rightScore >= pointsToWin) {
+        // reset game!
+        state = createState();
+      }
+    }
+  }
+
+  const gamepads = navigator.getGamepads();
   for (let i = 0; i < stepsToSimulate; i++) {
     const dt = 1000 / physicFramesPerSecond;
     switch (state.type) {
+      case "startScreen":
+        // press start to play
+        for (const gamepad of gamepads) {
+          if (gamepad?.buttons[9].pressed || keysDown.has("Enter")) {
+            state.type = "countdown";
+          }
+        }
+        break;
       case "countdown":
         state.countdown -= dt;
         if (state.countdown <= 0) {
@@ -106,8 +108,6 @@ export function updateAndDraw(
         }
         break;
       case "playing": {
-        const gamepads = navigator.getGamepads();
-
         const leftControllerLeftJoystick = gamepads[0]?.axes[1]; // -1 is up, 1 is down
         if (keysDown.has("w") || gamepads[0]?.buttons[12].pressed) {
           state.leftPaddleY -= paddleSpeed * dt;
@@ -123,7 +123,7 @@ export function updateAndDraw(
           state.leftPaddleY += amount * paddleSpeed * dt;
         }
 
-        const rightControllerLeftJoystick = gamepads[0]?.axes[3]; // -1 is up, 1 is down
+        const rightControllerLeftJoystick = gamepads[1]?.axes[1]; // -1 is up, 1 is down
         if (keysDown.has("ArrowUp") || gamepads[1]?.buttons[12].pressed) {
           state.rightPaddleY -= paddleSpeed * dt;
         } else if (
@@ -171,7 +171,8 @@ export function updateAndDraw(
           state.ball.scale += ballScaleUp;
         }
 
-        const leniency = 10; // additional space to make paddles bigger
+        const leniency = 20; // additional space to make paddles bigger
+        const freezeTime = 45 + state.ball.speed * 45;
         if (
           state.ball.x - state.ballWidth * 0.5 < paddleWidth &&
           state.ball.y - state.ballWidth * 0.5 + leniency > state.leftPaddleY &&
@@ -179,6 +180,7 @@ export function updateAndDraw(
             state.leftPaddleY + paddleHeight
         ) {
           playHitSound();
+          state.timeToSimulate -= freezeTime;
           if (playersControlAngle) {
             const ballDistanceFromPaddleCenter =
               state.ball.y - (state.leftPaddleY + paddleHeight / 2);
@@ -192,7 +194,7 @@ export function updateAndDraw(
           }
           state.ball.x = paddleWidth + state.ballWidth * 0.5;
           gamepads[0]?.vibrationActuator?.playEffect("dual-rumble", {
-            duration: 50,
+            duration: freezeTime,
             strongMagnitude: 1,
             weakMagnitude: 1,
           });
@@ -208,6 +210,7 @@ export function updateAndDraw(
             state.rightPaddleY + paddleHeight
         ) {
           playHitSound();
+          state.timeToSimulate -= freezeTime;
           if (playersControlAngle) {
             const ballDistanceFromPaddleCenter =
               state.ball.y - (state.rightPaddleY + paddleHeight / 2);
@@ -221,7 +224,7 @@ export function updateAndDraw(
           }
           state.ball.x = 400 - paddleWidth - state.ballWidth * 0.5;
           gamepads[1]?.vibrationActuator?.playEffect("dual-rumble", {
-            duration: 50,
+            duration: freezeTime,
             strongMagnitude: 1,
             weakMagnitude: 1,
           });
@@ -235,23 +238,19 @@ export function updateAndDraw(
           x: prevBallPos.x,
           y: prevBallPos.y,
         });
+        const winFreeze = 350;
         if (state.ball.x - state.ballWidth * 0.5 < 0) {
           state.rightScore++;
           playScoreSound();
-          if (state.rightScore < pointsToWin) {
-            startNewRound(state);
-          }
+          state.timeToSimulate -= winFreeze;
+          state.newRound = true;
+          stepsToSimulate = 0;
         } else if (state.ball.x + state.ballWidth * 0.5 > 400) {
           state.leftScore++;
           playScoreSound();
-          if (state.leftScore < pointsToWin) {
-            startNewRound(state);
-          }
-        }
-
-        if (state.leftScore >= pointsToWin || state.rightScore >= pointsToWin) {
-          state.type = "gameover";
-          state.countdown = 3000;
+          state.timeToSimulate -= winFreeze;
+          state.newRound = true;
+          stepsToSimulate = 0;
         }
 
         while (state.ball.trail.length > ballTrailParts) {
@@ -267,12 +266,6 @@ export function updateAndDraw(
         break;
       }
 
-      case "gameover":
-        state.countdown -= dt;
-        if (state.countdown <= 0) {
-          // TODO: resetState
-        }
-        break;
       default:
         throw new Error(`Unhandled state: ${state}`);
     }
@@ -284,17 +277,16 @@ export function updateAndDraw(
   ctx.save();
 
   // letterboxed 4:3 centered
+  const margin = 25;
   const gameArea = (() => {
-    const drawingRectRatio = drawingRect.width / drawingRect.height;
+    const marginWidth = drawingRect.width - margin * 2;
+    const marginHeight = drawingRect.height - margin * 2;
+    const drawingRectRatio = marginWidth / marginHeight;
     const targetRatio = 4 / 3;
     const drawingRectWidth =
-      drawingRectRatio > targetRatio
-        ? drawingRect.height * targetRatio
-        : drawingRect.width;
+      drawingRectRatio > targetRatio ? marginHeight * targetRatio : marginWidth;
     const drawingRectHeight =
-      drawingRectRatio > targetRatio
-        ? drawingRect.height
-        : drawingRect.width / targetRatio;
+      drawingRectRatio > targetRatio ? marginHeight : marginWidth / targetRatio;
     return {
       x: drawingRect.width / 2 - drawingRectWidth / 2,
       y: drawingRect.height / 2 - drawingRectHeight / 2,
@@ -306,74 +298,96 @@ export function updateAndDraw(
   ctx.fillStyle = "black";
   ctx.fillRect(0, 0, drawingRect.width, drawingRect.height);
   ctx.fillStyle = "#333";
-  {
-    ctx.save();
-    ctx.translate(gameArea.x, gameArea.y);
-    ctx.scale(
-      gameArea.width / gameResolution.width,
-      gameArea.height / gameResolution.height,
-    );
-    ctx.translate(state.cameraOffset.x, state.cameraOffset.y);
-    ctx.fillRect(0, 0, gameResolution.width, gameResolution.height);
 
-    ctx.fillStyle = "white";
-    ctx.fillRect(0, state.leftPaddleY, paddleWidth, paddleHeight);
+  ctx.save();
+  ctx.translate(gameArea.x, gameArea.y);
+  ctx.scale(
+    gameArea.width / gameResolution.width,
+    gameArea.height / gameResolution.height,
+  );
+  ctx.translate(state.cameraOffset.x, state.cameraOffset.y);
+  ctx.fillRect(0, 0, gameResolution.width, gameResolution.height);
 
-    ctx.fillStyle = "white";
-    ctx.fillRect(
-      gameResolution.width - paddleWidth,
-      state.rightPaddleY,
-      paddleWidth,
-      paddleHeight,
-    );
+  ctx.beginPath();
+  ctx.rect(0, 0, gameResolution.width, gameResolution.height);
+  ctx.clip();
 
-    if (state.type !== "countdown") {
+  switch (
+    state.type // DRAW
+  ) {
+    case "startScreen":
+      // draw text "press start to play"
+      ctx.fillStyle = "white";
+      ctx.font = "20px Arial";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillText(
+        "press start to play",
+        gameResolution.width / 2,
+        gameResolution.height / 2,
+      );
+      break;
+    default:
+      ctx.fillStyle = "white";
+      ctx.fillRect(0, state.leftPaddleY, paddleWidth, paddleHeight);
+
       ctx.fillStyle = "white";
       ctx.fillRect(
-        state.ball.x - state.ballWidth * state.ball.scale * 0.5,
-        state.ball.y - state.ballWidth * state.ball.scale * 0.5,
-        state.ballWidth * state.ball.scale,
-        state.ballWidth * state.ball.scale,
+        gameResolution.width - paddleWidth,
+        state.rightPaddleY,
+        paddleWidth,
+        paddleHeight,
       );
 
-      state.ball.trail.forEach((trailItem, index) => {
+      if (state.type !== "countdown") {
         ctx.fillStyle = "white";
-        const scale = (index / state.ball.trail.length) * 0.5 + 0.5;
         ctx.fillRect(
-          trailItem.x - state.ballWidth * state.ball.scale * 0.5 * scale,
-          trailItem.y - state.ballWidth * state.ball.scale * 0.5 * scale,
-          state.ballWidth * state.ball.scale * scale,
-          state.ballWidth * state.ball.scale * scale,
+          state.ball.x - state.ballWidth * state.ball.scale * 0.5,
+          state.ball.y - state.ballWidth * state.ball.scale * 0.5,
+          state.ballWidth * state.ball.scale,
+          state.ballWidth * state.ball.scale,
         );
-      });
-    }
-    ctx.restore();
-  }
 
-  ctx.fillStyle = "white";
-  ctx.font = "30px Arial";
-  ctx.textAlign = "center";
+        state.ball.trail.forEach((trailItem, index) => {
+          ctx.fillStyle = "white";
+          const scale = (index / state.ball.trail.length) * 0.5 + 0.5;
+          ctx.fillRect(
+            trailItem.x - state.ballWidth * state.ball.scale * 0.5 * scale,
+            trailItem.y - state.ballWidth * state.ball.scale * 0.5 * scale,
+            state.ballWidth * state.ball.scale * scale,
+            state.ballWidth * state.ball.scale * scale,
+          );
+        });
+      }
+      ctx.fillStyle = "white";
+      ctx.font = "30px Arial";
+      ctx.textAlign = "center";
 
-  ctx.fillText(
-    `${state.leftScore} - ${state.rightScore}`,
-    gameArea.x + gameArea.width / 2,
-    gameArea.y + 30,
-  );
+      if (state.countdown === 0) {
+        ctx.fillText(
+          `${state.leftScore} - ${state.rightScore}`,
+          gameResolution.width / 2,
+          30,
+        );
+      }
 
-  if (gameState.countdown > 0) {
-    ctx.fillStyle = "black";
-    ctx.globalAlpha = 0.5;
-    ctx.fillRect(0, 0, drawingRect.width, drawingRect.height);
-    ctx.globalAlpha = 1;
-    ctx.fillStyle = "white";
-    ctx.font = "100px Arial";
-    ctx.textAlign = "center";
-    ctx.textBaseline = "middle";
-    ctx.fillText(
-      `${Math.ceil(gameState.countdown / 1000)}`,
-      drawingRect.width / 2,
-      drawingRect.height / 2,
-    );
+      ctx.restore();
+
+      if (state.countdown > 0) {
+        ctx.fillStyle = "black";
+        ctx.globalAlpha = 0.5;
+        ctx.fillRect(0, 0, drawingRect.width, drawingRect.height);
+        ctx.globalAlpha = 1;
+        ctx.fillStyle = "white";
+        ctx.font = "100px Arial";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillText(
+          `${Math.ceil(state.countdown / 1000)}`,
+          drawingRect.width / 2,
+          drawingRect.height / 2,
+        );
+      }
   }
 
   ctx.restore();

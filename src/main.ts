@@ -1,5 +1,4 @@
 // vite bundling bug? (try switching this import order!)
-import { gameState } from "./state";
 import { updateAndDraw } from "./pong";
 
 const FIXED_FPS = null; // null for requestAnimationFrame, or a number for fixed FPS
@@ -35,7 +34,7 @@ function gameStep() {
   const newTime = performance.now();
   const dt = newTime - lastTime;
   lastTime = newTime;
-  updateAndDraw(canvas, ctx, dt, gameState);
+  updateAndDraw(canvas, ctx, dt);
 
   if (SHOW_FRAME_TIME) {
     const endTime = performance.now();
@@ -46,18 +45,16 @@ function gameStep() {
     if (total > maxTime) {
       maxTime = total;
     }
-    ctx.textBaseline = "top";
-    ctx.fillStyle = "red";
-    ctx.font = "20px sans-serif";
-    ctx.fillText(
-      `max frame time: ${maxTime.toFixed(1)}ms, (${Math.round((100 * maxTime) / BUDGET)}%)`,
-      10,
-      10,
-    );
-    ctx.fillText(`dropped frames: ${droppedFrames}`, 10, 40);
-    ctx.save();
-    ctx.textAlign = "right";
-    ctx.restore();
+
+    // ctx.textBaseline = "top";
+    // ctx.fillStyle = "red";
+    // ctx.font = "20px sans-serif";
+    // ctx.fillText(
+    //   `max frame time: ${maxTime.toFixed(1)}ms, (${Math.round((100 * maxTime) / BUDGET)}%)`,
+    //   10,
+    //   10,
+    // );
+    // ctx.fillText(`dropped frames: ${droppedFrames}`, 10, 40);
   }
 }
 
