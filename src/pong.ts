@@ -4,7 +4,7 @@ const gameResolution = { width: 400, height: 300 };
 const paddleWidth = 10;
 const paddleHeight = 70;
 const startSpeed = 0.3;
-const maxSpeed = 0.8;
+const maxSpeed = 2.0;
 const speedApproachFactor = 0.05;
 const pointsToWin = 11;
 const paddleSpeed = 0.5;
@@ -312,9 +312,7 @@ export function updateAndDraw(
   ctx.rect(0, 0, gameResolution.width, gameResolution.height);
   ctx.clip();
 
-  switch (
-    state.type // DRAW
-  ) {
+  switch (state.type) {
     case "startScreen":
       // draw text "press start to play"
       ctx.fillStyle = "white";
