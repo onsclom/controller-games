@@ -349,6 +349,8 @@ export function updateAndDraw(
         state.ball.trail.forEach((trailItem, index) => {
           ctx.fillStyle = "white";
           const scale = (index / state.ball.trail.length) * 0.5 + 0.5;
+          const opacity = 1 - (1 - index / state.ball.trail.length);
+          ctx.globalAlpha = opacity;
           ctx.fillRect(
             trailItem.x - state.ballWidth * state.ball.scale * 0.5 * scale,
             trailItem.y - state.ballWidth * state.ball.scale * 0.5 * scale,
@@ -356,6 +358,7 @@ export function updateAndDraw(
             state.ballWidth * state.ball.scale * scale,
           );
         });
+        ctx.globalAlpha = 1;
       }
       ctx.fillStyle = "white";
       ctx.font = "30px Arial";
