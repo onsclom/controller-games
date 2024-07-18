@@ -1,5 +1,5 @@
 // vite bundling bug? (try switching this import order!)
-import { updateAndDraw } from "./pong";
+import { updateAndDraw } from "./menu";
 
 const FIXED_FPS = null; // null for requestAnimationFrame, or a number for fixed FPS
 const SHOW_FRAME_TIME = true;

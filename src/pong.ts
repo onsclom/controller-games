@@ -1,4 +1,5 @@
 import { playBounceSound, playHitSound, playScoreSound } from "./sound";
+import { returnToMenu } from "./menu";
 
 const gameResolution = { width: 400, height: 300 };
 const paddleWidth = 10;
@@ -85,6 +86,7 @@ export function updateAndDraw(
       if (state.leftScore >= pointsToWin || state.rightScore >= pointsToWin) {
         // reset game!
         state = createState();
+        returnToMenu();
       }
     }
   }
