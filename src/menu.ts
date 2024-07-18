@@ -45,44 +45,32 @@ export function updateAndDraw(
     ctx.font = `${fontSize}px Arial`;
     ctx.textAlign = "center";
     const gameNames = Object.keys(games);
-    const curGame =
-      gameNames[modulusThatHandlesNegatives(index, gameNames.length)];
     const canvasRect = canvas.getBoundingClientRect();
-    const animatedDifference = animatedIndex - index;
-    const numberToDrawAboveAndBelow = 3;
+    const numberToDrawAboveAndBelow = 4;
     const spacing = 10;
-    ctx.fillText(
-      curGame,
-      canvasRect.width / 2,
-      canvasRect.height / 2 - animatedDifference * (fontSize + spacing),
-    );
 
-    ctx.globalAlpha = 0.2;
+    const totalToDraw = numberToDrawAboveAndBelow * 2 + 1;
+    const center = Math.floor(totalToDraw / 2);
+    for (let i = 0; i < totalToDraw; i++) {
+      const gameIndex = modulusThatHandlesNegatives(
+        index + i - center,
+        gameNames.length,
+      );
+      const animatedDifference = animatedIndex - index;
+      const gameName = gameNames[gameIndex];
+      const y =
+        canvasRect.height / 2 +
+        (i - center - animatedDifference) * (fontSize + spacing);
 
-    for (let i = 1; i <= numberToDrawAboveAndBelow; i++) {
-      const gameAbove =
-        gameNames[modulusThatHandlesNegatives(index - i, gameNames.length)];
-      if (gameAbove) {
-        ctx.fillText(
-          gameAbove,
-          canvasRect.width / 2,
-          canvasRect.height / 2 -
-            (i + animatedDifference) * (fontSize + spacing),
-        );
-      }
-      const gameBelow =
-        gameNames[modulusThatHandlesNegatives(index + i, gameNames.length)];
-      if (gameBelow) {
-        ctx.fillText(
-          gameBelow,
-          canvasRect.width / 2,
-          canvasRect.height / 2 +
-            (i - animatedDifference) * (fontSize + spacing),
-        );
-      }
+      const distFromCenter = Math.min(
+        1,
+        Math.abs(i - center - animatedDifference) *
+          (1 / numberToDrawAboveAndBelow),
+      );
+      ctx.globalAlpha = 1 - distFromCenter ** 0.5;
+      ctx.fillText(gameName, canvasRect.width / 2, y);
+      ctx.globalAlpha = 1;
     }
-    ctx.globalAlpha = 1;
-
     return;
   }
 
@@ -101,6 +89,6 @@ document.addEventListener("keydown", (e) => {
   if (e.key === "ArrowDown") index++;
   if (e.key === "ArrowUp") index--;
   if (e.key === "Enter") {
-    game = gameNames.at(index)!;
+    game = gameNames[modulusThatHandlesNegatives(index, gameNames.length)];
   }
 });
