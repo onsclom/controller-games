@@ -51,6 +51,7 @@ export function updateAndDraw(
 
     const totalToDraw = numberToDrawAboveAndBelow * 2 + 1;
     const centerOffset = Math.floor(totalToDraw / 2);
+    ctx.filter = `blur(${Math.abs(index - animatedIndex) * 2}px)`;
     {
       const animatedIndexFloored = Math.floor(animatedIndex);
       for (let i = 0; i < totalToDraw; i++) {
