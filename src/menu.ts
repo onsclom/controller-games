@@ -13,7 +13,11 @@ let game = games[2] as null | (typeof games)[number];
 let index = 0;
 let animatedIndex = 0;
 
-export function updateAndDraw(canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D, dt: number) {
+export function updateAndDraw(
+  canvas: HTMLCanvasElement,
+  ctx: CanvasRenderingContext2D,
+  dt: number,
+) {
   // UPDATE
   /////////////
   if (!game) {
@@ -50,12 +54,21 @@ export function updateAndDraw(canvas: HTMLCanvasElement, ctx: CanvasRenderingCon
     const totalToDraw = numberToDrawAboveAndBelow * 2 + 1;
     const center = Math.floor(totalToDraw / 2);
     for (let i = 0; i < totalToDraw; i++) {
-      const gameIndex = modulusThatHandlesNegatives(index + i - center, gameNames.length);
+      const gameIndex = modulusThatHandlesNegatives(
+        index + i - center,
+        gameNames.length,
+      );
       const animatedDifference = animatedIndex - index;
       const gameName = gameNames[gameIndex];
-      const y = canvasRect.height / 2 + (i - center - animatedDifference) * (fontSize + spacing);
+      const y =
+        canvasRect.height / 2 +
+        (i - center - animatedDifference) * (fontSize + spacing);
 
-      const distFromCenter = Math.min(1, Math.abs(i - center - animatedDifference) * (1 / numberToDrawAboveAndBelow));
+      const distFromCenter = Math.min(
+        1,
+        Math.abs(i - center - animatedDifference) *
+          (1 / numberToDrawAboveAndBelow),
+      );
       ctx.globalAlpha = 1 - distFromCenter ** 0.5;
       ctx.fillText(gameName, canvasRect.width / 2, y);
       ctx.globalAlpha = 1;

@@ -6,18 +6,28 @@ const gameResolution = { width: 400, height: 300 };
 // - count: [1, 2, 3]
 // - shape: [S, O, diamond]
 
-type Color = 'red' | 'green' | 'blue';
-type Fill = 'solid' | 'dashed' | 'outline';
+type Color = "red" | "green" | "blue";
+type Fill = "solid" | "dashed" | "outline";
 type Count = 1 | 2 | 3;
 
-export function updateAndDraw(canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D, dt: number) {
+export function updateAndDraw(
+  canvas: HTMLCanvasElement,
+  ctx: CanvasRenderingContext2D,
+  dt: number,
+) {
   // make letterboxed area
   const gameArea = (() => {
     const drawingRect = canvas.getBoundingClientRect();
     const drawingRectRatio = drawingRect.width / drawingRect.height;
     const targetRatio = gameResolution.width / gameResolution.height;
-    const drawingRectWidth = drawingRectRatio > targetRatio ? drawingRect.height * targetRatio : drawingRect.width;
-    const drawingRectHeight = drawingRectRatio > targetRatio ? drawingRect.height : drawingRect.width / targetRatio;
+    const drawingRectWidth =
+      drawingRectRatio > targetRatio
+        ? drawingRect.height * targetRatio
+        : drawingRect.width;
+    const drawingRectHeight =
+      drawingRectRatio > targetRatio
+        ? drawingRect.height
+        : drawingRect.width / targetRatio;
     return {
       x: drawingRect.width / 2 - drawingRectWidth / 2,
       y: drawingRect.height / 2 - drawingRectHeight / 2,
@@ -26,16 +36,19 @@ export function updateAndDraw(canvas: HTMLCanvasElement, ctx: CanvasRenderingCon
     };
   })();
 
-  ctx.fillStyle = '#333';
+  ctx.fillStyle = "#333";
   ctx.save();
 
   ctx.translate(gameArea.x, gameArea.y);
-  ctx.scale(gameArea.width / gameResolution.width, gameArea.height / gameResolution.height);
+  ctx.scale(
+    gameArea.width / gameResolution.width,
+    gameArea.height / gameResolution.height,
+  );
   ctx.fillRect(0, 0, gameResolution.width, gameResolution.height);
 
-  drawO(ctx, 'red', 'solid', 3, 50);
-  drawO(ctx, 'blue', 'dashed', 2, 100);
-  drawO(ctx, 'green', 'outline', 1, 150);
+  drawO(ctx, "red", "solid", 3, 50);
+  drawO(ctx, "blue", "dashed", 2, 100);
+  drawO(ctx, "green", "outline", 1, 150);
 
   ctx.restore();
 }
@@ -45,8 +58,8 @@ function drawS(ctx: CanvasRenderingContext2D) {
     curviness: 60,
     width: 300,
     height: 100,
-    strokeColor: 'blue',
-    fillColor: 'red',
+    strokeColor: "blue",
+    fillColor: "red",
   };
 
   ctx.beginPath();
@@ -82,21 +95,33 @@ function drawS(ctx: CanvasRenderingContext2D) {
 // TODO: function to draw a card.
 // then pass the card coords to the shape function.
 
-function drawO(ctx: CanvasRenderingContext2D, color: Color, fill: Fill, count: Count, y: number) {
+function drawO(
+  ctx: CanvasRenderingContext2D,
+  color: Color,
+  fill: Fill,
+  count: Count,
+  y: number,
+) {
   const shapeWidth = 20;
   const shapeHeight = 32;
   for (let i = 0; i < count; i++) {
     ctx.strokeStyle = color;
     ctx.fillStyle = color;
     ctx.beginPath();
-    ctx.roundRect(20 + (shapeWidth + 10) * i, y, shapeWidth, shapeHeight, shapeHeight);
+    ctx.roundRect(
+      20 + (shapeWidth + 10) * i,
+      y,
+      shapeWidth,
+      shapeHeight,
+      shapeHeight,
+    );
     ctx.closePath();
-    if (fill === 'outline') ctx.stroke();
-    if (fill === 'solid') {
+    if (fill === "outline") ctx.stroke();
+    if (fill === "solid") {
       ctx.stroke();
       ctx.fill();
     }
-    if (fill === 'dashed') {
+    if (fill === "dashed") {
       ctx.save();
       ctx.stroke();
       ctx.clip();
