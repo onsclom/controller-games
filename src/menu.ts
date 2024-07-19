@@ -3,7 +3,7 @@ import { updateAndDraw as bulletHellUpdateAndDraw } from "./bullet-hell";
 
 const games = {
   pong: pongUpdateAndDraw,
-  "bullet hell": bulletHellUpdateAndDraw,
+  dodge: bulletHellUpdateAndDraw,
 };
 const gameNames = Object.keys(games);
 
@@ -32,7 +32,7 @@ export function updateAndDraw(
     });
   }
 
-  animatedIndex += (index - animatedIndex) * 0.01 * dt;
+  animatedIndex += (index - animatedIndex) * 0.015 * dt;
 
   // DRAW
   /////////////
@@ -47,29 +47,32 @@ export function updateAndDraw(
     const gameNames = Object.keys(games);
     const canvasRect = canvas.getBoundingClientRect();
     const numberToDrawAboveAndBelow = 4;
-    const spacing = 10;
+    const spacing = 20;
 
     const totalToDraw = numberToDrawAboveAndBelow * 2 + 1;
-    const center = Math.floor(totalToDraw / 2);
-    for (let i = 0; i < totalToDraw; i++) {
-      const gameIndex = modulusThatHandlesNegatives(
-        index + i - center,
-        gameNames.length,
-      );
-      const animatedDifference = animatedIndex - index;
-      const gameName = gameNames[gameIndex];
-      const y =
-        canvasRect.height / 2 +
-        (i - center - animatedDifference) * (fontSize + spacing);
+    const centerOffset = Math.floor(totalToDraw / 2);
+    {
+      const animatedIndexFloored = Math.floor(animatedIndex);
+      for (let i = 0; i < totalToDraw; i++) {
+        const gameIndex = modulusThatHandlesNegatives(
+          animatedIndexFloored + i - centerOffset,
+          gameNames.length,
+        );
+        const animatedDecimal = animatedIndex - animatedIndexFloored;
+        const gameName = gameNames[gameIndex];
+        const y =
+          canvasRect.height / 2 +
+          (i - centerOffset - animatedDecimal) * (fontSize + spacing);
 
-      const distFromCenter = Math.min(
-        1,
-        Math.abs(i - center - animatedDifference) *
-          (1 / numberToDrawAboveAndBelow),
-      );
-      ctx.globalAlpha = 1 - distFromCenter ** 0.5;
-      ctx.fillText(gameName, canvasRect.width / 2, y);
-      ctx.globalAlpha = 1;
+        const distFromCenter = Math.min(
+          1,
+          Math.abs(i - centerOffset - animatedDecimal) *
+            (1 / numberToDrawAboveAndBelow),
+        );
+        ctx.globalAlpha = 1 - distFromCenter ** 0.5;
+        ctx.fillText(gameName, canvasRect.width / 2, y);
+        ctx.globalAlpha = 1;
+      }
     }
     return;
   }
