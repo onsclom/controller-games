@@ -6,9 +6,37 @@ const gameResolution = { width: 400, height: 300 };
 // - count: [1, 2, 3]
 // - shape: [S, O, diamond]
 
+type Shape = "S" | "O" | "diamond";
 type Color = "red" | "green" | "blue";
 type Fill = "solid" | "dashed" | "outline";
 type Count = 1 | 2 | 3;
+
+type Card = {
+  color: Color;
+  fill: Fill;
+  count: Count;
+  shape: Shape;
+};
+
+function isSet(cards: [Card, Card, Card]) {
+  const allSameColor = new Set(cards.map((card) => card.color)).size === 1;
+  const allSameFill = new Set(cards.map((card) => card.fill)).size === 1;
+  const allSameCount = new Set(cards.map((card) => card.count)).size === 1;
+  const allSameShape = new Set(cards.map((card) => card.shape)).size === 1;
+
+  // a set can also be made of 3 cards with all different values for a particular attribute
+  const allDifferentColor = new Set(cards.map((card) => card.color)).size === 3;
+  const allDifferentFill = new Set(cards.map((card) => card.fill)).size === 3;
+  const allDifferentCount = new Set(cards.map((card) => card.count)).size === 3;
+  const allDifferentShape = new Set(cards.map((card) => card.shape)).size === 3;
+
+  return (
+    (allSameColor || allDifferentColor) &&
+    (allSameFill || allDifferentFill) &&
+    (allSameCount || allDifferentCount) &&
+    (allSameShape || allDifferentShape)
+  );
+}
 
 export function updateAndDraw(
   canvas: HTMLCanvasElement,
