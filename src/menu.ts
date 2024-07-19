@@ -1,11 +1,11 @@
-import { updateAndDraw as pongUpdateAndDraw } from './pong';
-import { updateAndDraw as bulletHellUpdateAndDraw } from './bullet-hell';
-import { updateAndDraw as setUpdateAndDraw } from './set';
+import { updateAndDraw as pongUpdateAndDraw } from "./pong";
+import { updateAndDraw as bulletHellUpdateAndDraw } from "./bullet-hell";
+import { updateAndDraw as setUpdateAndDraw } from "./set";
 
 const games = [
-  ['pong', pongUpdateAndDraw],
-  ['bullet hell', bulletHellUpdateAndDraw],
-  ['set', setUpdateAndDraw],
+  ["pong", pongUpdateAndDraw],
+  ["bullet hell", bulletHellUpdateAndDraw],
+  ["set", setUpdateAndDraw],
 ] as const;
 
 // let game = null as null | (typeof games)[number];
@@ -39,9 +39,9 @@ export function updateAndDraw(canvas: HTMLCanvasElement, ctx: CanvasRenderingCon
 
     const fontSize = 30;
     // draw the current game in the middle
-    ctx.fillStyle = 'white';
+    ctx.fillStyle = "white";
     ctx.font = `${fontSize}px Arial`;
-    ctx.textAlign = 'center';
+    ctx.textAlign = "center";
     const gameNames = games.map(([name]) => name);
     const canvasRect = canvas.getBoundingClientRect();
     const numberToDrawAboveAndBelow = 4;
@@ -75,10 +75,10 @@ export function returnToMenu() {
   game = null;
 }
 
-document.addEventListener('keydown', (e) => {
-  if (e.key === 'ArrowDown') index++;
-  if (e.key === 'ArrowUp') index--;
-  if (e.key === 'Enter') {
+document.addEventListener("keydown", (e) => {
+  if (e.key === "ArrowDown") index++;
+  if (e.key === "ArrowUp") index--;
+  if (e.key === "Enter") {
     game = games[modulusThatHandlesNegatives(index, games.length)];
   }
 });
