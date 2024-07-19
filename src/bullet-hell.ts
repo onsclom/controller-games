@@ -13,7 +13,7 @@ const gameSize = {
 const spawnIntervalStart = 70;
 const spawnIntervalEnd = 15;
 
-let gameState = createState();
+let state = createState();
 function createState() {
   return {
     players: Array.from({ length: playersAmount }, () => ({
@@ -33,27 +33,11 @@ function createState() {
   };
 }
 
-// const spawnInterval = 20;
-// setInterval(() => {
-//   gameState.bullets.push({
-//     x: Math.random() * gameSize.width,
-//     y: 0 - playerRadius,
-//     speed: Math.random() * 0.5 + 0.5,
-//   });
-// }, spawnInterval);
 const keysDown = new Set();
 document.addEventListener("keydown", (e) => keysDown.add(e.key));
 document.addEventListener("keyup", (e) => keysDown.delete(e.key));
 
-export function updateAndDraw(
-  canvas: HTMLCanvasElement,
-  ctx: CanvasRenderingContext2D,
-  dt: number,
-) {
-  const state = gameState;
-
-  // UPDATE
-  /////////////
+export function update(dt: number) {
   const allPlayersDead = state.players.every((player) => player.dead);
   if (allPlayersDead) {
     // if either player pressed start, start a new game
@@ -66,7 +50,7 @@ export function updateAndDraw(
       gamepads[3]?.buttons[9].pressed ||
       keysDown.has("Enter")
     ) {
-      gameState = createState();
+      state = createState();
       returnToMenu();
     }
   } else {
@@ -81,7 +65,7 @@ export function updateAndDraw(
         x: gamepad.axes[0],
         y: gamepad.axes[1],
       };
-      const player = gameState.players[i];
+      const player = state.players[i];
       const speed = Math.min(1, Math.sqrt(moveDir.x ** 2 + moveDir.y ** 2));
       const deadzone = 0.2;
       if (speed > deadzone) {
@@ -100,9 +84,9 @@ export function updateAndDraw(
     }
 
     const diffToTarget = spawnIntervalEnd - state.spawnInterval;
-    gameState.spawnInterval += 0.0001 * dt * diffToTarget;
-    while (state.timeToSimulateBulletSpawning > gameState.spawnInterval) {
-      state.timeToSimulateBulletSpawning -= gameState.spawnInterval;
+    state.spawnInterval += 0.0001 * dt * diffToTarget;
+    while (state.timeToSimulateBulletSpawning > state.spawnInterval) {
+      state.timeToSimulateBulletSpawning -= state.spawnInterval;
       state.bullets.push({
         x: Math.random() * gameSize.width,
         y: 0 - playerRadius,
@@ -124,10 +108,9 @@ export function updateAndDraw(
       });
     });
   }
+}
 
-  // DRAW
-  /////////////
-
+export function draw(canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D) {
   // make letterboxed area
   const gameArea = (() => {
     const drawingRect = canvas.getBoundingClientRect();
@@ -156,7 +139,7 @@ export function updateAndDraw(
   ctx.fillRect(0, 0, gameSize.width, gameSize.height);
 
   // draw players
-  gameState.players.forEach((player, i) => {
+  state.players.forEach((player, i) => {
     ctx.save();
     ctx.fillStyle = playerColors[i];
     ctx.beginPath();

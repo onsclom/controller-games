@@ -18,7 +18,7 @@ let state = createState();
 
 export function createState() {
   const state = {
-    type: "startScreen" as "startScreen" | "countdown" | "playing",
+    type: "countdown" as "countdown" | "playing",
     countdown: 3000,
     newRound: false,
 
@@ -66,13 +66,7 @@ function startNewRound(state: ReturnType<typeof createState>) {
   state.rightPaddleY = gameResolution.height / 2 - paddleHeight / 2;
 }
 
-export function updateAndDraw(
-  canvas: HTMLCanvasElement,
-  ctx: CanvasRenderingContext2D,
-  dt: number,
-) {
-  // UPDATE
-  /////////////
+export function update(dt: number) {
   state.timeToSimulate += dt;
   let stepsToSimulate = Math.floor(
     state.timeToSimulate / (1000 / physicFramesPerSecond),
@@ -95,14 +89,6 @@ export function updateAndDraw(
   for (let i = 0; i < stepsToSimulate; i++) {
     const dt = 1000 / physicFramesPerSecond;
     switch (state.type) {
-      case "startScreen":
-        // press start to play
-        for (const gamepad of gamepads) {
-          if (gamepad?.buttons[9].pressed || keysDown.has("Enter")) {
-            state.type = "countdown";
-          }
-        }
-        break;
       case "countdown":
         state.countdown -= dt;
         if (state.countdown <= 0) {
@@ -272,9 +258,9 @@ export function updateAndDraw(
         throw new Error(`Unhandled state: ${state}`);
     }
   }
+}
 
-  // DRAW
-  /////////////
+export function draw(canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D) {
   const drawingRect = canvas.getBoundingClientRect();
   ctx.save();
 
@@ -299,7 +285,7 @@ export function updateAndDraw(
 
   ctx.fillStyle = "black";
   ctx.fillRect(0, 0, drawingRect.width, drawingRect.height);
-  ctx.fillStyle = "#333";
+  ctx.fillStyle = "#151515";
 
   ctx.save();
   ctx.translate(gameArea.x, gameArea.y);
@@ -315,18 +301,6 @@ export function updateAndDraw(
   ctx.clip();
 
   switch (state.type) {
-    case "startScreen":
-      // draw text "press start to play"
-      ctx.fillStyle = "white";
-      ctx.font = "20px Arial";
-      ctx.textAlign = "center";
-      ctx.textBaseline = "middle";
-      ctx.fillText(
-        "press start to play",
-        gameResolution.width / 2,
-        gameResolution.height / 2,
-      );
-      break;
     default:
       ctx.fillStyle = "white";
       ctx.fillRect(0, state.leftPaddleY, paddleWidth, paddleHeight);
