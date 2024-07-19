@@ -1,13 +1,15 @@
 import { updateAndDraw as pongUpdateAndDraw } from "./pong";
 import { updateAndDraw as bulletHellUpdateAndDraw } from "./bullet-hell";
+import { updateAndDraw as setUpdateAndDraw } from "./set";
 
-const games = {
-  pong: pongUpdateAndDraw,
-  "bullet hell": bulletHellUpdateAndDraw,
-};
-const gameNames = Object.keys(games);
+const games = [
+  ["pong", pongUpdateAndDraw],
+  ["bullet hell", bulletHellUpdateAndDraw],
+  ["set", setUpdateAndDraw],
+] as const;
 
-let game = null as null | keyof typeof games;
+// let game = null as null | (typeof games)[number];
+let game = games[2] as null | (typeof games)[number];
 let index = 0;
 let animatedIndex = 0;
 
@@ -44,7 +46,7 @@ export function updateAndDraw(
     ctx.fillStyle = "white";
     ctx.font = `${fontSize}px Arial`;
     ctx.textAlign = "center";
-    const gameNames = Object.keys(games);
+    const gameNames = games.map(([name]) => name);
     const canvasRect = canvas.getBoundingClientRect();
     const numberToDrawAboveAndBelow = 4;
     const spacing = 10;
@@ -74,7 +76,8 @@ export function updateAndDraw(
     return;
   }
 
-  games[game](canvas, ctx, dt);
+  const [_gameName, updateAndDraw] = game;
+  updateAndDraw(canvas, ctx, dt);
 }
 
 function modulusThatHandlesNegatives(n: number, m: number) {
@@ -89,6 +92,6 @@ document.addEventListener("keydown", (e) => {
   if (e.key === "ArrowDown") index++;
   if (e.key === "ArrowUp") index--;
   if (e.key === "Enter") {
-    game = gameNames[modulusThatHandlesNegatives(index, gameNames.length)];
+    game = games[modulusThatHandlesNegatives(index, games.length)];
   }
 });
