@@ -19,22 +19,16 @@ type Card = {
 };
 
 function isSet(cards: [Card, Card, Card]) {
-  const allSameColor = new Set(cards.map((card) => card.color)).size === 1;
-  const allSameFill = new Set(cards.map((card) => card.fill)).size === 1;
-  const allSameCount = new Set(cards.map((card) => card.count)).size === 1;
-  const allSameShape = new Set(cards.map((card) => card.shape)).size === 1;
-
-  // a set can also be made of 3 cards with all different values for a particular attribute
-  const allDifferentColor = new Set(cards.map((card) => card.color)).size === 3;
-  const allDifferentFill = new Set(cards.map((card) => card.fill)).size === 3;
-  const allDifferentCount = new Set(cards.map((card) => card.count)).size === 3;
-  const allDifferentShape = new Set(cards.map((card) => card.shape)).size === 3;
+  const colors = new Set(cards.map((card) => card.color));
+  const fills = new Set(cards.map((card) => card.fill));
+  const counts = new Set(cards.map((card) => card.count));
+  const shapes = new Set(cards.map((card) => card.shape));
 
   return (
-    (allSameColor || allDifferentColor) &&
-    (allSameFill || allDifferentFill) &&
-    (allSameCount || allDifferentCount) &&
-    (allSameShape || allDifferentShape)
+    (colors.size === 1 || colors.size === 3) &&
+    (fills.size === 1 || fills.size === 3) &&
+    (counts.size === 1 || counts.size === 3) &&
+    (shapes.size === 1 || shapes.size === 3)
   );
 }
 
