@@ -19,7 +19,3 @@ export let paused = false;
 export function setPause(newPaused: boolean) {
   paused = newPaused;
 }
-
-export function pause() {
-  setPause(true);
-}

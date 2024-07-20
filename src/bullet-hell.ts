@@ -1,3 +1,4 @@
+import { Buttons, justPressed } from "./controller";
 import { returnToMenu } from "./menu";
 
 const playersAmount = 2;
@@ -42,17 +43,13 @@ export function update(dt: number) {
   if (allPlayersDead) {
     // if either player pressed start, start a new game
     const gamepads = navigator.getGamepads();
-
-    if (
-      gamepads[0]?.buttons[9].pressed ||
-      gamepads[1]?.buttons[9].pressed ||
-      gamepads[2]?.buttons[9].pressed ||
-      gamepads[3]?.buttons[9].pressed ||
-      keysDown.has("Enter")
-    ) {
-      state = createState();
-      returnToMenu();
-    }
+    gamepads.forEach((gamepad) => {
+      if (!gamepad) return;
+      if (justPressed(Buttons.A, gamepad)) {
+        state = createState();
+        returnToMenu();
+      }
+    });
   } else {
     state.timeToSimulateBulletSpawning += dt;
     state.roundTime += dt;
@@ -192,9 +189,9 @@ export function draw(canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D) {
     ctx.textBaseline = "middle";
 
     ctx.fillText(
-      (state.players[0].deadTime > state.players[1].deadTime
+      state.players[0].deadTime > state.players[1].deadTime
         ? "red wins!"
-        : "blue wins!") + " press start to play again",
+        : "blue wins!",
       gameSize.width / 2,
       gameSize.height / 2,
     );

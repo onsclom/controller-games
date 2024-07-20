@@ -1,19 +1,19 @@
 import * as Pong from "./pong";
 import * as BulletHell from "./bullet-hell";
-import { pause, paused, setPause } from "./pause";
+import * as SetGame from "./set";
+import { paused, setPause } from "./pause";
 import { Buttons, justPressed } from "./controller";
 
-const games = [
-  {
-    name: "pong",
-    logic: Pong,
-  },
-  {
-    name: "dodge",
-    logic: BulletHell,
-  },
-] as const;
-let game = null as null | (typeof games)[number];
+const games = (
+  [
+    { name: "pong", logic: Pong, live: true },
+    { name: "dodge", logic: BulletHell },
+    { name: "set", logic: SetGame },
+  ] as const
+).filter((game) => import.meta.env.DEV || "live" in game);
+
+// let game = null as null | (typeof games)[number];
+let game = games[2] as null | (typeof games)[number];
 let index = 0;
 let animatedIndex = 0;
 
@@ -84,9 +84,13 @@ export function updateAndDraw(
     return;
   }
 
-  if (navigator.getGamepads().some((gamepad) => gamepad?.buttons[9].pressed)) {
-    pause();
-  }
+  const gamepads = navigator.getGamepads();
+  gamepads.forEach((gamepad) => {
+    if (!gamepad) return;
+    if (justPressed(Buttons.START, gamepad)) {
+      setPause(!paused);
+    }
+  });
 
   if (!paused) {
     game.logic.update(dt);
