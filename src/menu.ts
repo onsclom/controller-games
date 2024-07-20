@@ -2,7 +2,8 @@ import * as Pong from "./pong";
 import * as BulletHell from "./bullet-hell";
 import * as SetGame from "./set";
 import { paused, setPause } from "./pause";
-import { Buttons, justPressed } from "./controller";
+import { Axes, Buttons, joystickJustMoved, justPressed } from "./controller";
+import { playMenuChangeSound } from "./sound";
 
 const games = (
   [
@@ -13,7 +14,7 @@ const games = (
 ).filter((game) => import.meta.env.DEV || "live" in game);
 
 // let game = null as null | (typeof games)[number];
-let game = games[2] as null | (typeof games)[number];
+let game = null as null | (typeof games)[number];
 let index = 0;
 let animatedIndex = 0;
 
@@ -28,11 +29,19 @@ export function updateAndDraw(
     const gamepads = navigator.getGamepads();
     gamepads.forEach((gamepad) => {
       if (!gamepad) return;
-      if (justPressed(Buttons.DPAD_DOWN, gamepad)) {
+      if (
+        justPressed(Buttons.DPAD_DOWN, gamepad) ||
+        joystickJustMoved(Axes.LEFT_STICK_Y, 1, gamepad)
+      ) {
         index++;
+        playMenuChangeSound();
       }
-      if (justPressed(Buttons.DPAD_UP, gamepad)) {
+      if (
+        justPressed(Buttons.DPAD_UP, gamepad) ||
+        joystickJustMoved(Axes.LEFT_STICK_Y, -1, gamepad)
+      ) {
         index--;
+        playMenuChangeSound();
       }
       if (
         justPressed(Buttons.A, gamepad) ||
@@ -88,15 +97,19 @@ export function updateAndDraw(
   gamepads.forEach((gamepad) => {
     if (!gamepad) return;
     if (justPressed(Buttons.START, gamepad)) {
-      setPause(!paused);
+      // setPause(!paused);
+      // game
+      game = null;
     }
   });
 
   if (!paused) {
-    game.logic.update(dt);
+    game?.logic?.update(dt);
   }
   if (game !== null) {
+    ctx.save();
     game.logic.draw(canvas, ctx);
+    ctx.restore();
   }
   const drawRect = canvas.getBoundingClientRect();
   if (paused) {

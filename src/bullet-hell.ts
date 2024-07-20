@@ -4,7 +4,7 @@ import { returnToMenu } from "./menu";
 const playersAmount = 2;
 const playerColors = ["#ff0000", "#0000ff", "#00ff00", "#ffff00"];
 const playerRadius = 2;
-const bulletRadius = playerRadius * 0.33;
+const bulletRadius = playerRadius * 0.5;
 const enemyColor = "black";
 const gameSize = {
   width: 160,
@@ -15,10 +15,12 @@ const spawnIntervalStart = 70;
 const spawnIntervalEnd = 15;
 
 let state = createState();
+
 function createState() {
+  const playerSpacing = 10;
   return {
-    players: Array.from({ length: playersAmount }, () => ({
-      x: gameSize.width / 2,
+    players: Array.from({ length: playersAmount }, (_, i) => ({
+      x: gameSize.width / 2 + i * playerSpacing - playerSpacing / 2,
       y: gameSize.height / 2,
       dead: false,
       deadTime: 0,

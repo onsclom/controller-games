@@ -1,4 +1,4 @@
-import { Buttons, justPressed } from "./controller";
+import { Axes, Buttons, joystickJustMoved, justPressed } from "./controller";
 
 const colors = ["red", "green", "blue"] as const;
 const fills = ["solid", "dashed", "outline"] as const;
@@ -10,7 +10,6 @@ const cardRadius = 10;
 function createState() {
   const deck = generateAllCards();
   shuffleCards(deck);
-  // deck.length = 10;
   const board = deck.splice(0, 12);
   return {
     countDown: 3000,
@@ -43,10 +42,30 @@ function createState() {
 const state = createState();
 
 const controlToDirection = [
-  [Buttons.DPAD_LEFT, { x: -1, y: 0 }],
-  [Buttons.DPAD_RIGHT, { x: 1, y: 0 }],
-  [Buttons.DPAD_UP, { x: 0, y: -1 }],
-  [Buttons.DPAD_DOWN, { x: 0, y: 1 }],
+  {
+    dpad: Buttons.DPAD_LEFT,
+    dir: { x: -1, y: 0 },
+    joystick: Axes.LEFT_STICK_X,
+    joystickDir: -1,
+  },
+  {
+    dpad: Buttons.DPAD_RIGHT,
+    dir: { x: 1, y: 0 },
+    joystick: Axes.LEFT_STICK_X,
+    joystickDir: 1,
+  },
+  {
+    dpad: Buttons.DPAD_UP,
+    dir: { x: 0, y: -1 },
+    joystick: Axes.LEFT_STICK_Y,
+    joystickDir: -1,
+  },
+  {
+    dpad: Buttons.DPAD_DOWN,
+    dir: { x: 0, y: 1 },
+    joystick: Axes.LEFT_STICK_Y,
+    joystickDir: 1,
+  },
 ] as const;
 
 const playerToGamepad = {
@@ -63,8 +82,16 @@ export function update(dt: number) {
     const rows = Math.ceil(state.board.length / 4);
     const cols = Math.min(4, state.board.length);
     justPressed(Buttons.DPAD_LEFT, gamepad);
-    for (const [button, direction] of controlToDirection) {
-      if (justPressed(button, gamepad)) {
+    for (const {
+      dpad: button,
+      dir: direction,
+      joystick,
+      joystickDir,
+    } of controlToDirection) {
+      if (
+        justPressed(button, gamepad) ||
+        joystickJustMoved(joystick, joystickDir, gamepad)
+      ) {
         const player = state[side];
 
         player.cursor.x = intuitiveModulus(player.cursor.x + direction.x, cols);
