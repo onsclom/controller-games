@@ -1,6 +1,7 @@
 import * as Pong from "./pong";
 import * as BulletHell from "./bullet-hell";
 import { pause, paused, setPause } from "./pause";
+import { Buttons, justPressed } from "./controller";
 
 const games = [
   {
@@ -27,17 +28,15 @@ export function updateAndDraw(
     const gamepads = navigator.getGamepads();
     gamepads.forEach((gamepad) => {
       if (!gamepad) return;
-      if (gamepad.buttons[13].pressed) {
+      if (justPressed(Buttons.DPAD_DOWN, gamepad)) {
         index++;
       }
-      if (gamepad.buttons[12].pressed) {
+      if (justPressed(Buttons.DPAD_UP, gamepad)) {
         index--;
       }
       if (
-        // "A" button pressed
-        gamepad.buttons[0].pressed ||
-        // "start" button pressed
-        gamepad.buttons[9].pressed
+        justPressed(Buttons.A, gamepad) ||
+        justPressed(Buttons.START, gamepad)
       ) {
         game = games[intuitiveModulus(index, games.length)];
       }
@@ -115,16 +114,3 @@ function intuitiveModulus(n: number, m: number) {
 export function returnToMenu() {
   game = null;
 }
-
-// for dev
-// document.addEventListener("keydown", (e) => {
-//   if (e.key === "ArrowDown") index++;
-//   if (e.key === "ArrowUp") index--;
-//   if (e.key === "Enter") {
-//     if (game) {
-//       setPause(!paused);
-//     } else {
-//       game = games[intuitiveModulus(index, games.length)];
-//     }
-//   }
-// });

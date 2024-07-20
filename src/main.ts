@@ -1,4 +1,5 @@
 // vite bundling bug? (try switching this import order!)
+import { saveGamepadState } from "./controller";
 import { updateAndDraw } from "./menu";
 
 const FIXED_FPS = null; // null for requestAnimationFrame, or a number for fixed FPS
@@ -35,6 +36,7 @@ function gameStep() {
   const dt = newTime - lastTime;
   lastTime = newTime;
   updateAndDraw(canvas, ctx, dt);
+  saveGamepadState();
 
   if (SHOW_FRAME_TIME) {
     const endTime = performance.now();
