@@ -1,7 +1,3 @@
-/*
-some utils that make it easier to work with controlelrs
-*/
-
 export const Buttons = {
   DPAD_UP: 12,
   DPAD_DOWN: 13,
