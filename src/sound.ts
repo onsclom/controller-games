@@ -6,13 +6,14 @@ export function playSound(props: {
   type: "sine" | "triangle" | "sawtooth" | "square";
   frequency: number;
   duration: number;
+  delay?: number;
 }) {
   const osc = audioContext.createOscillator();
   osc.connect(masterGain);
   osc.frequency.value = props.frequency;
   osc.type = props.type;
-  osc.start();
-  osc.stop(audioContext.currentTime + props.duration);
+  osc.start(audioContext.currentTime + (props.delay || 0));
+  osc.stop(audioContext.currentTime + props.duration + (props.delay || 0));
 }
 
 // TODO: inline playSound and remove game specific sounds?

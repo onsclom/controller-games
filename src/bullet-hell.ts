@@ -1,6 +1,6 @@
 import { Buttons, justPressed } from "./controller";
 import { returnToMenu } from "./game-menu";
-
+import { playSound } from "./sound";
 const playersAmount = 2;
 const playerColors = ["#ff0000", "#0000ff", "#00ff00", "#ffff00"];
 const playerRadius = 2;
@@ -105,6 +105,17 @@ export function update(dt: number) {
         if (distanceToPlayer < playerRadius + bulletRadius) {
           player.dead = true;
           player.deadTime = state.roundTime;
+          if (state.players.every((player) => player.dead)) {
+            const freqs = [349, 349, 392, 440, 440, 392, 349, 329, 293, 293];
+            freqs.forEach((freq, i) => {
+              playSound({
+                frequency: freq,
+                type: "triangle",
+                duration: 0.2,
+                delay: 0.4 * i,
+              });
+            });
+          }
         }
       });
     });
