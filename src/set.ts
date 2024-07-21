@@ -129,8 +129,15 @@ export function update(dt: number) {
               state.board.splice(index, 1);
             }
           });
-
           player.selected.length = 0;
+
+          // check how many sets are on the board
+          const cardCombinations = combinations(state.board, 3);
+          const setCombos = cardCombinations.filter(isSet);
+          console.log(setCombos.length);
+          setCombos.forEach((set) => {
+            console.log(set);
+          });
         } else {
           console.log("not a set");
           player.selected.length = 0;
@@ -138,6 +145,28 @@ export function update(dt: number) {
       }
     }
   }
+}
+
+function combinations(arr: Card[], k: number) {
+  const n = arr.length;
+  const result: Card[][] = [];
+  function helper(start: number, current: Card[]) {
+    if (current.length === k) {
+      if (isSet(current)) {
+        result.push(current.slice());
+      }
+      return;
+    }
+
+    for (let i = start; i < n; i++) {
+      current.push(arr[i]);
+      helper(i + 1, current);
+      current.pop();
+    }
+  }
+
+  helper(0, []);
+  return result;
 }
 
 // const deck = generateAllCards();
@@ -163,6 +192,33 @@ export function draw(canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D) {
       Math.floor(i / cardsPerRow) * (cardHeight + cardGap),
     );
     drawCard(ctx, card);
+    const selectedCircleRadius = 30;
+    const leftPlayerSelected = state.left.selected.includes(card);
+    if (leftPlayerSelected) {
+      ctx.fillStyle = state.left.color;
+      ctx.beginPath();
+      ctx.roundRect(
+        0,
+        0,
+        selectedCircleRadius,
+        selectedCircleRadius,
+        selectedCircleRadius,
+      );
+      ctx.fill();
+    }
+    const rightPlayerSelected = state.right.selected.includes(card);
+    if (rightPlayerSelected) {
+      ctx.fillStyle = state.right.color;
+      ctx.beginPath();
+      ctx.roundRect(
+        cardWidth - selectedCircleRadius,
+        0,
+        selectedCircleRadius,
+        selectedCircleRadius,
+        selectedCircleRadius,
+      );
+      ctx.fill();
+    }
     ctx.restore();
   });
 

@@ -3,7 +3,7 @@ import { rightInput, leftInput, updateInput } from "./input";
 import { legalMoves, moveIsLegal, pieceAtRankAndFile } from "./move-rules";
 import { playSound } from "./sound";
 import { gameState, resetGameState } from "./state";
-import { returnToMenu } from "../menu";
+import { returnToMenu } from "../game-menu";
 
 const DARK_COLOR = "#999";
 

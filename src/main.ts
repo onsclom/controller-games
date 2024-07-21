@@ -1,6 +1,6 @@
 // vite bundling bug? (try switching this import order!)
 import { saveGamepadState } from "./controller";
-import { updateAndDraw } from "./menu";
+import { updateAndDraw } from "./game-menu";
 
 const FIXED_FPS = null; // null for requestAnimationFrame, or a number for fixed FPS
 const SHOW_FRAME_TIME = true;
@@ -41,11 +41,11 @@ function gameStep() {
   if (SHOW_FRAME_TIME) {
     const endTime = performance.now();
     const total = endTime - newTime;
-    if (total > BUDGET) {
+    if (endTime > BUDGET) {
       droppedFrames++;
     }
-    if (total > maxTime) {
-      maxTime = total;
+    if (endTime > maxTime) {
+      maxTime = endTime;
     }
 
     // ctx.textBaseline = "top";

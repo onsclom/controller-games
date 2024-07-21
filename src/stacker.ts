@@ -1,5 +1,5 @@
 import { Buttons, justPressed } from "./controller";
-import { returnToMenu } from "./menu";
+import { returnToMenu } from "./game-menu";
 import { playSound } from "./sound";
 
 const rainbowColors = ["#fcc", "#cfc", "#ccf"];
