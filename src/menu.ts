@@ -4,7 +4,13 @@ import * as SetGame from "./set";
 import * as AsyncChess from "./async-chess/versus";
 import * as Stacker from "./stacker";
 import { paused } from "./pause"; // TODO: decide if i actually care about pausing rn
-import { Axes, Buttons, joystickJustMoved, justPressed } from "./controller";
+import {
+  Axes,
+  Buttons,
+  joystickJustMoved,
+  justPressed,
+  saveGamepadState,
+} from "./controller";
 import { playMenuChangeSound } from "./sound";
 
 const games = [
@@ -49,6 +55,7 @@ export function updateAndDraw(
         justPressed(Buttons.START, gamepad)
       ) {
         game = games[intuitiveModulus(index, games.length)];
+        saveGamepadState(); // reset just pressed for new game!
         game.logic.reset();
       }
     });
