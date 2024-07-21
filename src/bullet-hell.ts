@@ -15,6 +15,9 @@ const spawnIntervalStart = 70;
 const spawnIntervalEnd = 15;
 
 let state = createState();
+export function reset() {
+  state = createState();
+}
 
 function createState() {
   const playerSpacing = 10;
@@ -48,7 +51,6 @@ export function update(dt: number) {
     gamepads.forEach((gamepad) => {
       if (!gamepad) return;
       if (justPressed(Buttons.A, gamepad)) {
-        state = createState();
         returnToMenu();
       }
     });

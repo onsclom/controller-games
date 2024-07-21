@@ -39,7 +39,10 @@ function createState() {
   };
 }
 
-const state = createState();
+let state = createState();
+export function reset() {
+  state = createState();
+}
 
 const controlToDirection = [
   {

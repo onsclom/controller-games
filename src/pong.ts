@@ -15,6 +15,9 @@ const physicFramesPerSecond = 1000;
 const playersControlAngle = true;
 
 let state = createState();
+export function reset() {
+  state = createState();
+}
 
 export function createState() {
   const state = {
@@ -78,8 +81,6 @@ export function update(dt: number) {
       startNewRound(state);
       state.newRound = false;
       if (state.leftScore >= pointsToWin || state.rightScore >= pointsToWin) {
-        // reset game!
-        state = createState();
         returnToMenu();
       }
     }

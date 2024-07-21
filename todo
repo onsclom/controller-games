@@ -1,105 +1,27 @@
-core stuff:
-x allow moving pieces
-x allow capturing pieces
-x allow cancelling selections
-x add cooldowns
-x disallow illegal moves
-x add win condition: taking opponent's king
-  x stop taking inputs
-  x show win screen
-  x allow restarting game maybe?
-x add auto promotion to queen
-x add controller support
-x add premoves
+game ideas:
+- tron
+- bomberman
+- flappy bird
+- circle game
+- tag pro ctf 2v2
 
-other core stuff discovered while working on core stuff:
-x unselect if selected piece is taken
-x add move indicators
-x handle enemy taking select piece
-x cancel premoves as soon as they are illegal
+general:
+- handle 1-4 player support
+  - let players have names (AUST) & colors
+  - add leaderboards for singleplayer highscore games
+  - update games to support 1-4 players
+- make good pause menu
+  - resume
+  - back to menu
+  - say who paused
+- warn if no controllers connected
+- warn if apis are missing? (tell user to use chrome)
 
-fancy but important fun stuff:
-- draw different move indicator for taking pieces
-- animations
-  x piece move animation
-  - piece death animation
-- sounds
-x title screen with some fun starting countdown?
+async chess:
+  - support joystick
+  - support controller vibration
 
-x randomize player we do actions for first every frame
-(inputs can come in on same frame, lets make it fair)
-
-future stuff:
-- consider using seb's premove logic
-
-idea:
-x maybe make b allow x2 movement
-- 2v2 TEAMS hype
-
----
-
-june 14th
-
-things i wanna do:
-- sounds
-x animations
-- UI for ready up and restart?
-
-- make sure piece z index makes sense for animations (pieces moved recently should be on top)
-- maybe change cooldown visual to be pie chart?
-
-- implement key repeat for directions!
-
-- maybe checks actually put all pieces on cool down except for pieces that can prevent the check?
-
----
-
-june 15th
-
-things i'd like to do today:
-- add death animations
-- make loading indicators circular
-x show enemy cursor and selection
-x add scale animation to pieces
-x make different move indicators for taking pieces
-- add sounds to more things:
-  - countdown
-  - select
-  - deselect
-  - game over
-x add castling
-- add button repeat
-
-ideas:
-- checks put all pieces on cool downs except for pieces that can prevent the check
-- taking pieces could help lower cooldowns ?
-
-7/4 ideas:
-- on win, show raining pieces of the winner's color
-- add tie timeout timer
-  - add scoring system to limit ties
-    - (add up piece values, and use pawn advancement as tie breaker)
-
-add teams??:
-- controller select:
-
-white   black
-x
-        x
-        x
-x
-
-
-add ai!:
-- i want to record demo videos by myself.. duh!
-- and its a fun, hard challenge
-
-algo:
-
-  - start aimless
-
-  - while aimless:
-    - randomly select a piece
-    - if that piece has legal moves
-      - randomly select a legal move
-      - make that the ai's "aim"
+bullet hell:
+  - add sound
+  - add effects?
+  - add controller vibration

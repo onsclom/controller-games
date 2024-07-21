@@ -1,19 +1,20 @@
 import * as Pong from "./pong";
 import * as BulletHell from "./bullet-hell";
 import * as SetGame from "./set";
-import { paused, setPause } from "./pause";
+import * as AsyncChess from "./async-chess/versus";
+import * as Stacker from "./stacker";
+import { paused } from "./pause"; // TODO: decide if i actually care about pausing rn
 import { Axes, Buttons, joystickJustMoved, justPressed } from "./controller";
 import { playMenuChangeSound } from "./sound";
 
-const games = (
-  [
-    { name: "pong", logic: Pong, live: true },
-    { name: "dodge", logic: BulletHell },
-    { name: "set", logic: SetGame },
-  ] as const
-).filter((game) => import.meta.env.DEV || "live" in game);
+const games = [
+  { name: "pong", logic: Pong },
+  { name: "dodge", logic: BulletHell },
+  { name: "set", logic: SetGame },
+  { name: "async chess", logic: AsyncChess },
+  { name: "stacker", logic: Stacker },
+] as const;
 
-// let game = null as null | (typeof games)[number];
 let game = null as null | (typeof games)[number];
 let index = 0;
 let animatedIndex = 0;
@@ -48,6 +49,7 @@ export function updateAndDraw(
         justPressed(Buttons.START, gamepad)
       ) {
         game = games[intuitiveModulus(index, games.length)];
+        game.logic.reset();
       }
     });
   }
