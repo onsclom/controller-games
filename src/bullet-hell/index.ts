@@ -1,6 +1,6 @@
-import { Buttons, justPressed } from "./controller";
-import { returnToMenu } from "./game-menu";
-import { playSound } from "./sound";
+import { Buttons, justPressed } from "../controller";
+import { returnToMenu } from "../game-menu";
+import { playSound } from "../sound";
 const playersAmount = 2;
 const playerColors = ["#ff0000", "#0000ff", "#00ff00", "#ffff00"];
 const playerRadius = 2;

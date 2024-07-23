@@ -1,6 +1,15 @@
 // vite bundling bug? (try switching this import order!)
 import { saveGamepadState } from "./controller";
-import { updateAndDraw } from "./game-menu";
+import { update, draw } from "./game-menu";
+// import { state } from "./state";
+let mainUpdate = update;
+export function setMainUpdate(update: typeof mainUpdate) {
+  mainUpdate = update;
+}
+let mainDraw = draw;
+export function setMainDraw(draw: typeof mainDraw) {
+  mainDraw = draw;
+}
 
 const FIXED_FPS = null; // null for requestAnimationFrame, or a number for fixed FPS
 const SHOW_FRAME_TIME = true;
@@ -35,35 +44,41 @@ function gameStep() {
   const newTime = performance.now();
   const dt = newTime - lastTime;
   lastTime = newTime;
-  updateAndDraw(canvas, ctx, dt);
+  ctx.save();
+  update(dt);
+  draw(canvas, ctx);
+  ctx.restore();
   saveGamepadState();
 
-  if (SHOW_FRAME_TIME) {
-    const endTime = performance.now();
-    const total = endTime - newTime;
-    if (endTime > BUDGET) {
-      droppedFrames++;
-    }
-    if (endTime > maxTime) {
-      maxTime = endTime;
-    }
+  // if (SHOW_FRAME_TIME) {
+  //   const endTime = performance.now();
+  //   const total = endTime - newTime;
+  //   if (total > BUDGET) {
+  //     droppedFrames++;
+  //   }
+  //   if (total > maxTime) {
+  //     maxTime = total;
+  //   }
 
-    // ctx.textBaseline = "top";
-    // ctx.fillStyle = "red";
-    // ctx.font = "20px sans-serif";
-    // ctx.fillText(
-    //   `max frame time: ${maxTime.toFixed(1)}ms, (${Math.round((100 * maxTime) / BUDGET)}%)`,
-    //   10,
-    //   10,
-    // );
-    // ctx.fillText(`dropped frames: ${droppedFrames}`, 10, 40);
-  }
+  //   ctx.textBaseline = "top";
+  //   ctx.fillStyle = "red";
+  //   ctx.font = "20px sans-serif";
+  //   ctx.fillText(
+  //     `max frame time: ${total.toFixed(1)}ms, (${Math.round((100 * total) / BUDGET)}%)`,
+  //     10,
+  //     10,
+  //   );
+  //   ctx.fillText(`dropped frames: ${droppedFrames}`, 10, 40);
+  // }
 }
 
 if (import.meta.hot) {
-  import.meta.hot.accept(() => {
-    cancelAnimationFrame(raf);
-    clearInterval(interval);
-    canvas.remove();
+  import.meta.hot.accept((module) => {
+    if (module) {
+      cancelAnimationFrame(raf);
+      clearInterval(interval);
+      canvas.remove();
+    }
+    // else it's a syntax error!
   });
 }

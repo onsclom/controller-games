@@ -1,4 +1,4 @@
-import { Axes, Buttons, joystickJustMoved, justPressed } from "./controller";
+import { Axes, Buttons, joystickJustMoved, justPressed } from "../controller";
 
 const colors = ["red", "green", "blue"] as const;
 const fills = ["solid", "dashed", "outline"] as const;
@@ -110,11 +110,9 @@ export function update(dt: number) {
       } else {
         player.selected.push(card);
       }
-      console.log(player.selected);
 
       if (player.selected.length === 3) {
         if (isSet(player.selected)) {
-          console.log("set found!");
           player.won.push(...player.selected);
           const otherPlayer = state[side === "left" ? "right" : "left"];
           otherPlayer.selected = otherPlayer.selected.filter(
@@ -134,12 +132,7 @@ export function update(dt: number) {
           // check how many sets are on the board
           const cardCombinations = combinations(state.board, 3);
           const setCombos = cardCombinations.filter(isSet);
-          console.log(setCombos.length);
-          setCombos.forEach((set) => {
-            console.log(set);
-          });
         } else {
-          console.log("not a set");
           player.selected.length = 0;
         }
       }
@@ -273,20 +266,12 @@ function shuffleCards(cards: Card[]) {
 }
 
 type Card = ReturnType<typeof generateAllCards>[number];
-function isSet(cards: Card[]) {
-  if (cards.length !== 3) return false;
-  const colors = new Set(cards.map((card) => card.color));
-  const fills = new Set(cards.map((card) => card.fill));
-  const counts = new Set(cards.map((card) => card.count));
-  const shapes = new Set(cards.map((card) => card.shape));
 
-  return (
-    (colors.size === 1 || colors.size === 3) &&
-    (fills.size === 1 || fills.size === 3) &&
-    (counts.size === 1 || counts.size === 3) &&
-    (shapes.size === 1 || shapes.size === 3)
-  );
-}
+const isSet = (cards: Card[]) =>
+  cards.length === 3 &&
+  (["color", "fill", "count", "shape"] as const)
+    .map((key) => new Set(cards.map((card) => card[key])))
+    .every((set) => set.size === 1 || set.size === 3);
 
 const shapeDrawers = {
   S: drawS,
