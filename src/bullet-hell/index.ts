@@ -1,5 +1,5 @@
 import { Buttons, justPressed } from "../controller";
-import { returnToMenu } from "../game-menu";
+import { returnToMenu } from "../state";
 import { playSound } from "../sound";
 const playersAmount = 2;
 const playerColors = ["#ff0000", "#0000ff", "#00ff00", "#ffff00"];

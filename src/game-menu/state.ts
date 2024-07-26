@@ -1,5 +1,5 @@
 // state seperated out for HMR
-import { games, colors } from "./constants";
+import { colors } from "./constants";
 
 export function createState() {
   return {
@@ -14,10 +14,10 @@ export function createState() {
         color: colors[i],
       })),
 
-    game: null as null | (typeof games)[number],
+    game: null as null | number,
     index: 0,
     animatedIndex: 0,
   };
 }
 
-export let state = createState();
+export type State = ReturnType<typeof createState>;

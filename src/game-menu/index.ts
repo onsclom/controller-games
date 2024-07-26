@@ -6,32 +6,37 @@ import {
   saveGamepadState,
 } from "../controller";
 import { playMenuChangeSound } from "../sound";
-import { charsToChooseFrom, games } from "./constants";
-import { state } from "./state";
+import { charsToChooseFrom } from "./constants";
+import { games } from "./games";
+import type { State } from "./state";
 
-export function update(dt: number) {
+export function update(state: State, dt: number) {
   switch (state.menu) {
     case "controller":
-      updateControllerMenu(dt);
+      updateControllerMenu(state, dt);
       break;
     case "game":
-      updateGameMenu(dt);
+      updateGameMenu(state, dt);
       break;
   }
 }
 
-export function draw(canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D) {
+export function draw(
+  state: State,
+  canvas: HTMLCanvasElement,
+  ctx: CanvasRenderingContext2D,
+) {
   switch (state.menu) {
     case "controller":
-      drawControllerMenu(canvas, ctx);
+      drawControllerMenu(state, canvas, ctx);
       break;
     case "game":
-      drawGameMenu(canvas, ctx);
+      drawGameMenu(state, canvas, ctx);
       break;
   }
 }
 
-function updateControllerMenu(dt: number) {
+function updateControllerMenu(state: State, dt: number) {
   const gamepads = navigator.getGamepads();
   gamepads.forEach((gamepad) => {
     if (!gamepad) return;
@@ -87,7 +92,7 @@ function updateControllerMenu(dt: number) {
   });
 }
 
-function updateGameMenu(dt: number) {
+function updateGameMenu(state: State, dt: number) {
   const gamepads = navigator.getGamepads();
   gamepads.forEach((gamepad) => {
     if (!gamepad) return;
@@ -114,9 +119,9 @@ function updateGameMenu(dt: number) {
         playMenuChangeSound();
       }
       if (justPressed(Buttons.A, gamepad)) {
-        state.game = games[intuitiveModulus(state.index, games.length)];
+        state.game = intuitiveModulus(state.index, games.length);
         saveGamepadState(); // reset just pressed for new game!
-        state.game.logic.reset();
+        games[state.game].logic.reset();
       }
 
       if (justPressed(Buttons.B, gamepad)) {
@@ -125,12 +130,13 @@ function updateGameMenu(dt: number) {
       }
     });
   } else {
-    state.game.logic.update(dt);
+    games[state.game].logic.update(dt);
   }
   state.animatedIndex += (state.index - state.animatedIndex) * 0.015 * dt;
 }
 
 function drawControllerMenu(
+  state: State,
   canvas: HTMLCanvasElement,
   ctx: CanvasRenderingContext2D,
 ) {
@@ -247,6 +253,7 @@ function drawControllerMenu(
 }
 
 function drawGameMenu(
+  state: State,
   canvas: HTMLCanvasElement,
   ctx: CanvasRenderingContext2D,
 ) {
@@ -287,7 +294,7 @@ function drawGameMenu(
     }
     return;
   } else {
-    state.game.logic.draw(canvas, ctx);
+    games[state.game].logic.draw(canvas, ctx);
   }
 }
 
@@ -296,6 +303,6 @@ function intuitiveModulus(n: number, m: number) {
   return ((n % m) + m) % m;
 }
 
-export function returnToMenu() {
-  state.game = null;
-}
+// export function returnToMenu() {
+//   state.game = null;
+// }

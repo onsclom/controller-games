@@ -79,3 +79,64 @@ export function joystickJustMoved(axis: number, dir: 1 | -1, gamepad: Gamepad) {
     dir === 1 ? previousVal <= sensitivity : previousVal >= -sensitivity;
   return joystickInDirection && joystickWasNotInDirection;
 }
+
+// if is dev, allow keyboard input by monkeypatching navigator.getGamepads
+if (import.meta.env.DEV) {
+  const gamepads = navigator.getGamepads();
+  const gamepad = gamepads[0];
+  const keyboardGamepad = {
+    index: 0,
+    buttons: new Array(16).fill(0).map(() => ({ pressed: false })),
+    axes: new Array(4).fill(0),
+  };
+  // @ts-expect-error
+  navigator.getGamepads = () => {
+    return gamepads[0] ? gamepads : [keyboardGamepad, ...gamepads.slice(1)];
+  };
+  window.addEventListener("keydown", (e) => {
+    if (e.key === "ArrowUp") {
+      keyboardGamepad.buttons[Buttons.DPAD_UP].pressed = true;
+    }
+    if (e.key === "ArrowDown") {
+      keyboardGamepad.buttons[Buttons.DPAD_DOWN].pressed = true;
+    }
+    if (e.key === "ArrowLeft") {
+      keyboardGamepad.buttons[Buttons.DPAD_LEFT].pressed = true;
+    }
+    if (e.key === "ArrowRight") {
+      keyboardGamepad.buttons[Buttons.DPAD_RIGHT].pressed = true;
+    }
+    if (e.key === "Enter") {
+      keyboardGamepad.buttons[Buttons.START].pressed = true;
+    }
+    if (e.key === " ") {
+      keyboardGamepad.buttons[Buttons.A].pressed = true;
+    }
+    if (e.key === "Escape") {
+      keyboardGamepad.buttons[Buttons.B].pressed = true;
+    }
+  });
+  window.addEventListener("keyup", (e) => {
+    if (e.key === "ArrowUp") {
+      keyboardGamepad.buttons[Buttons.DPAD_UP].pressed = false;
+    }
+    if (e.key === "ArrowDown") {
+      keyboardGamepad.buttons[Buttons.DPAD_DOWN].pressed = false;
+    }
+    if (e.key === "ArrowLeft") {
+      keyboardGamepad.buttons[Buttons.DPAD_LEFT].pressed = false;
+    }
+    if (e.key === "ArrowRight") {
+      keyboardGamepad.buttons[Buttons.DPAD_RIGHT].pressed = false;
+    }
+    if (e.key === "Enter") {
+      keyboardGamepad.buttons[Buttons.START].pressed = false;
+    }
+    if (e.key === " ") {
+      keyboardGamepad.buttons[Buttons.A].pressed = false;
+    }
+    if (e.key === "Escape") {
+      keyboardGamepad.buttons[Buttons.B].pressed = false;
+    }
+  });
+}

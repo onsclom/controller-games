@@ -1,7 +1,8 @@
 // vite bundling bug? (try switching this import order!)
 import { saveGamepadState } from "./controller";
 import { update, draw } from "./game-menu";
-// import { state } from "./state";
+import { state } from "./state";
+
 let mainUpdate = update;
 export function setMainUpdate(update: typeof mainUpdate) {
   mainUpdate = update;
@@ -45,8 +46,8 @@ function gameStep() {
   const dt = newTime - lastTime;
   lastTime = newTime;
   ctx.save();
-  update(dt);
-  draw(canvas, ctx);
+  update(state, dt);
+  draw(state, canvas, ctx);
   ctx.restore();
   saveGamepadState();
 
@@ -75,10 +76,10 @@ function gameStep() {
 if (import.meta.hot) {
   import.meta.hot.accept((module) => {
     if (module) {
+      // else it's a syntax error!
       cancelAnimationFrame(raf);
       clearInterval(interval);
       canvas.remove();
     }
-    // else it's a syntax error!
   });
 }

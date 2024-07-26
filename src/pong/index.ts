@@ -1,5 +1,5 @@
 import { playBounceSound, playHitSound, playScoreSound } from "../sound";
-import { returnToMenu } from "../game-menu";
+import { returnToMenu } from "../state";
 
 const gameResolution = { width: 400, height: 300 };
 const paddleWidth = 10;
